@@ -20,6 +20,8 @@
   .btn.primary:hover:not(:disabled){background:var(--main-h);border-color:var(--main-h);color:var(--on)}
   .btn:disabled{opacity:.35;cursor:default}
   .btn.sm{padding:6px 12px;font-size:13px}
+  .btn.icon-home{width:34px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+  .btn.icon-home svg{width:17px;height:17px;display:block}
   .row{display:flex;gap:8px;flex-wrap:wrap}
 
   /* home */
@@ -32,6 +34,18 @@
   /* quiz */
   .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .top .l{display:flex;gap:10px;align-items:center}
+  .top-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+  .explanation-toggle{display:flex;align-items:center;gap:6px;color:var(--sub);font-size:13px;font-weight:600}
+  .switch-toggle{position:relative;display:block;width:42px;height:24px;padding:0;border:0;background:transparent;cursor:pointer;flex:none}
+  .switch-track{position:absolute;inset:2px 0;border-radius:999px;background:#E8E8E0;transition:background .2s}
+  .switch-thumb{position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #26352E33;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+  .switch-toggle[aria-pressed="true"] .switch-track{background:var(--main)}
+  .switch-toggle[aria-pressed="true"] .switch-thumb{transform:translateX(18px)}
+  .switch-toggle:focus-visible{outline:2px solid var(--main-d);outline-offset:2px;border-radius:999px}
+  .playback-button{width:36px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:17px;line-height:1;background:var(--main);border-color:var(--main);color:var(--on)}
+  .playback-button:hover:not(:disabled){background:var(--main-h);border-color:var(--main-h);color:var(--on)}
+  .playback-button.paused{background:var(--soft);border-color:var(--main);color:var(--main-d)}
+  .playback-button.paused:hover:not(:disabled){background:#D2EDE3;border-color:var(--main-h);color:var(--main-d)}
   .tag0{font-size:13px;color:var(--sub);font-weight:600}
   .modes{display:inline-flex;background:var(--chip);border-radius:8px;padding:3px}
   .modes button{border:0;background:transparent;padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--sub);font-weight:600}
@@ -78,6 +92,7 @@
   .nav button.primary:hover:not(:disabled){background:var(--main-h);border-color:var(--main-h)}
   .nav button:disabled{opacity:.35;cursor:default}
   .hint{font-size:12px;color:var(--sub);margin-top:12px;text-align:center}
+  .auto-hint{margin-top:12px;text-align:center;color:var(--main-d);font-size:14px;font-weight:600}
 
   /* result */
   .score{text-align:center;padding:10px 0}
@@ -98,6 +113,48 @@
   @keyframes cf{0%{opacity:1;transform:translate(0,0) rotate(0)}70%{opacity:1}100%{opacity:0;transform:translate(var(--dx),calc(var(--dy) + 40px)) rotate(var(--rot))}}
   .toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#2E3A35;color:#fff;padding:10px 20px;border-radius:999px;font-size:15px;font-weight:600;z-index:60;animation:tin .25s}
   @keyframes tin{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+  /* Keep the quiz controls visible on compact phone screens. */
+  @media (max-width:600px){
+    body{line-height:1.35}
+    .wrap{padding:10px 12px}
+    .top{gap:6px;margin-bottom:7px}
+    .top .l{gap:6px}
+    .btn.sm{padding:5px 9px}
+    .modes button{padding:5px 8px}
+    .bar{gap:6px;margin-bottom:5px}
+    .progress{font-size:18px;gap:7px}
+    .track{margin-bottom:8px}
+    .qcard{padding:12px}
+    .qhead{gap:6px;margin-bottom:8px}
+    .q{font-size:16px}
+    .starbtn{padding:3px 7px;font-size:12px}
+    .tag{font-size:11px;padding:1px 6px;margin-left:3px}
+    .fig{margin-bottom:8px}
+    .fig img{max-height:21vh;object-fit:contain}
+    .choices{gap:5px}
+    .choice{gap:8px;padding:7px 9px;font-size:14px;line-height:1.25}
+    .choice .n{width:21px;height:21px;font-size:12px}
+    .result{margin-top:7px;padding:7px 10px}
+    .exp{margin-top:6px;padding:8px 10px;font-size:12px;line-height:1.3}
+    .exp b{font-size:11px}
+    .nav{gap:8px;margin-top:8px}
+    .nav button{padding:9px;border-radius:7px;font-size:15px}
+    .hint{display:none}
+  }
+  @media (max-width:600px) and (max-height:700px){
+    .wrap{padding-top:6px;padding-bottom:6px}
+    .top{margin-bottom:4px}
+    .bar{margin-bottom:3px}
+    .track{margin-bottom:5px}
+    .qcard{padding:9px}
+    .qhead{margin-bottom:5px}
+    .fig img{max-height:17vh}
+    .choices{gap:4px}
+    .choice{padding:6px 8px;font-size:13px}
+    .exp{padding:6px 8px;font-size:11px}
+    .nav{margin-top:6px}
+  }
 </style>
 </head>
 <body>
@@ -108,7 +165,7 @@ const LS='dl-quiz-v2';
 const N=QUESTIONS.length;
 const MARK_PASS={1:70,2:60};
 function load(){
-  const d={last:{},wrong:{},stars:{},allPos:0,combo:0,best:0,mocks:[],mode:'solve',session:null,milestone:0};
+  const d={last:{},stars:{},allPos:0,combo:0,best:0,mocks:[],mode:'solve',session:null,milestone:0};
   try{return Object.assign(d,JSON.parse(localStorage.getItem(LS)||'{}'));}catch(e){return d;}
 }
 let S=load();
@@ -124,6 +181,11 @@ function h(tag,attrs,...kids){
   }
   for(const k of kids.flat()){ if(k==null||k===false)continue; e.append(k.nodeType?k:document.createTextNode(k)); }
   return e;
+}
+function homeIcon(){
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');svg.setAttribute('aria-hidden','true');
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z');svg.append(path);return svg;
 }
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 const range=n=>Array.from({length:n},(_,i)=>i+1);
@@ -162,14 +224,18 @@ const stopTimer=()=>{if(timer){clearInterval(timer);timer=null;}};
 
 /* ---------- sessions ---------- */
 function newSession(type,ids,label,extra){
-  S.session=Object.assign({type,ids,pos:0,ans:{},finished:false,label,seq:false,startedAt:Date.now()},extra||{});
+  S.session=Object.assign({type,ids,pos:0,ans:{},finished:false,label,seq:false,startedAt:Date.now(),showExplanation:true},extra||{});
   pending=[];save();renderQuiz();
 }
-function startSeq(pos){newSession('all',range(N),'전체 문제 풀기',{seq:true,pos:Math.max(0,Math.min(N-1,pos))});}
+function startSeq(pos){newSession('all',range(N),'전체 문제 · 순서대로',{seq:true,pos:Math.max(0,Math.min(N-1,pos))});}
+function startMemorize(random){
+  const ids=random?shuffle(range(N)):range(N);
+  newSession('memorize',ids,random?'논스톱 암기 · 랜덤':'논스톱 암기 · 순서대로',{phase:'question',paused:false,remainingMs:3000,showExplanation:true});
+}
 function startRandomAll(onlyUnsolved){
   let ids=range(N);if(onlyUnsolved)ids=ids.filter(i=>!(i in S.last));
   if(!ids.length){toast('안 푼 문제가 없어요');return;}
-  newSession('all',shuffle(ids),onlyUnsolved?'안 푼 문제 랜덤':'전체 문제 랜덤');
+  newSession('all',shuffle(ids),onlyUnsolved?'안 푼 문제 · 랜덤':'전체 문제 · 랜덤');
 }
 function startList(type,label,keys,random){
   const ids=Object.keys(keys).map(Number).sort((a,b)=>a-b);
@@ -197,7 +263,7 @@ function startMock(){
 /* ---------- home ---------- */
 function renderHome(){
   view='home';stopTimer();
-  const wrongN=Object.keys(S.wrong).length, starN=Object.keys(S.stars).length;
+  const starN=Object.keys(S.stars).length;
   const s=S.session, mockOn=s&&s.type==='mock'&&!s.finished;
   const root=h('div',{class:'home'});
   root.append(h('h1',{},'운전면허 필기시험 문제은행'),h('div',{class:'sub',style:'margin-bottom:16px'},'원하는 방식을 골라 주세요'));
@@ -208,15 +274,16 @@ function renderHome(){
       h('button',{class:'btn primary',onclick:()=>startSeq(S.allPos)},S.allPos>0?'이어서 풀기 ('+(S.allPos+1)+'번부터)':'순서대로 풀기'),
       S.allPos>0?h('button',{class:'btn',onclick:()=>startSeq(0)},'처음부터'):null,
       h('button',{class:'btn',onclick:()=>startRandomAll(false)},'랜덤으로 풀기'))));
+  menu.append(h('div',{class:'card'},h('h2',{},'논스톱 암기하기'),
+    h('p',{},'문제와 선택지를 보고 3초 뒤 정답을 확인해요. 다시 3초 뒤 다음 문제로 넘어가요.'),
+    h('div',{class:'row'},
+      h('button',{class:'btn primary',onclick:()=>startMemorize(false)},'순서대로 보기'),
+      h('button',{class:'btn',onclick:()=>startMemorize(true)},'랜덤으로 보기'))));
   menu.append(h('div',{class:'card'},h('h2',{},'모의고사'),
     h('p',{},'실제 시험처럼 40문제, 40분, 100점 만점이에요. 1종 70점, 2종 60점 이상이면 합격이에요.'),
     h('div',{class:'row'},
       mockOn?h('button',{class:'btn primary',onclick:()=>{pending=[];renderQuiz();}},'이어서 하기 ('+(s.pos+1)+'/40)'):null,
       h('button',{class:'btn'+(mockOn?'':' primary'),onclick:startMock},mockOn?'새로 시작':'시작하기'))));
-  menu.append(h('div',{class:'card'},h('h2',{},'오답노트 ('+wrongN+')'),
-    h('p',{},wrongN?'틀린 문제를 다시 풀어요. 맞히면 노트에서 빠져요.':'아직 틀린 문제가 없어요.'),
-    h('div',{class:'row'},
-      h('button',{class:'btn primary',disabled:!wrongN,onclick:()=>startList('wrong','오답노트',S.wrong,false)},'오답 풀기'))));
   menu.append(h('div',{class:'card'},h('h2',{},'별표 문제 ('+starN+')'),
     h('p',{},starN?'별표로 표시해 둔 문제를 모아서 풀어요.':'문제 화면의 별표 버튼을 누르면 여기에 모여요.'),
     h('div',{class:'row'},
@@ -227,25 +294,48 @@ function renderHome(){
 
 /* ---------- quiz ---------- */
 function curQ(){const s=S.session,id=s.ids[s.pos];return {s,id,q:QUESTIONS[id-1],need:QUESTIONS[id-1].answer.length};}
+function sessionTitle(s,review){
+  let title=s.label||'';
+  if(s.type==='all')title=s.seq?'전체 문제 · 순서대로':(title.includes('안 푼')?'안 푼 문제 · 랜덤':'전체 문제 · 랜덤');
+  else if(s.type==='memorize')title='논스톱 암기 · '+(title.includes('랜덤')?'랜덤':'순서대로');
+  else if(s.type==='star')title='별표 문제';
+  else if(s.type==='mock')title='모의고사';
+  return title+(review?' · 복습':'');
+}
 
 function renderQuiz(){
   view='quiz';
   if(!S.session){renderHome();return;}
   const {s,id,q,need}=curQ();
-  const isMock=s.type==='mock', review=isMock&&s.finished;
+  const isMock=s.type==='mock', review=isMock&&s.finished, auto=s.type==='memorize';
+  const explanationToggle=auto||s.type==='all', explanationVisible=s.showExplanation!==false;
   const a=s.ans[id];
   const total=s.ids.length;
   const root=h('div');
 
   // top bar
   const top=h('div',{class:'top'});
-  top.append(h('div',{class:'l'},h('button',{class:'btn sm',onclick:goHome},'홈'),h('span',{class:'tag0'},s.label+(review?' (복습)':''))));
-  if(!isMock){
+  top.append(h('div',{class:'l'},h('button',{class:'btn sm icon-home',type:'button',title:'홈','aria-label':'홈',onclick:goHome},homeIcon()),h('span',{class:'tag0'},sessionTitle(s,review))));
+  if(!isMock&&!auto&&s.type!=='all'){
     top.append(h('div',{class:'modes'},
       h('button',{class:S.mode==='solve'?'on':'',onclick:()=>{S.mode='solve';pending=[];save();renderQuiz();}},'문제 풀기'),
       h('button',{class:S.mode==='answer'?'on':'',onclick:()=>{S.mode='answer';save();renderQuiz();}},'정답 보기')));
   } else if(review){
     top.append(h('button',{class:'btn sm',onclick:renderResult},'결과 화면'));
+  }
+  if(explanationToggle||auto){
+    const actions=h('div',{class:'top-actions'});
+    if(explanationToggle){
+      actions.append(h('div',{class:'explanation-toggle'},
+        h('span',{},'해설'),
+        h('button',{class:'switch-toggle',type:'button',title:explanationVisible?'해설 숨기기':'해설 보기','aria-label':explanationVisible?'해설 표시 중, 숨기기':'해설 숨김, 보기','aria-pressed':explanationVisible?'true':'false',onclick:()=>setExplanationVisibility(!explanationVisible)},
+          h('span',{class:'switch-track'}),h('span',{class:'switch-thumb'}))));
+    }
+    if(s.type==='all')actions.append(h('div',{class:'modes'},
+      h('button',{class:S.mode==='solve'?'on':'',onclick:()=>{S.mode='solve';pending=[];save();renderQuiz();}},'문제 풀기'),
+      h('button',{class:S.mode==='answer'?'on':'',onclick:()=>{S.mode='answer';save();renderQuiz();}},'정답 보기')));
+    if(auto)actions.append(h('button',{class:'btn sm playback-button'+(s.paused?' paused':''),type:'button',title:s.paused?'재생':'일시정지','aria-label':s.paused?'재생':'일시정지',onclick:toggleAutoPause},s.paused?'▶':'⏸'));
+    top.append(actions);
   }
   root.append(top);
 
@@ -270,7 +360,7 @@ function renderQuiz(){
   const qt=h('p',{class:'q'},q.id+'. '+q.question);
   if(need>1)qt.append(h('span',{class:'tag'},'정답 '+need+'개 선택'));
   if(isMock&&s.pts)qt.append(h('span',{class:'tag'},'배점 '+s.pts[id]+'점'));
-  const sb=h('button',{class:'starbtn'+(S.stars[id]?' on':''),id:'starBtn',title:'별표 (S)',onclick:toggleStar},S.stars[id]?'★ 별표':'☆ 별표');
+  const sb=auto?null:h('button',{class:'starbtn'+(S.stars[id]?' on':''),id:'starBtn',title:'별표 (S)',onclick:toggleStar},S.stars[id]?'★ 별표':'☆ 별표');
   card.append(h('div',{class:'qhead'},qt,sb));
   if(isVideoQ(q))card.append(h('div',{class:'vnote'},'영상 문제예요. 영상은 PDF에 없어서 도로교통공단 홈페이지에서 따로 봐야 해요.'));
   if(q.image)card.append(h('div',{class:'fig'},h('img',{src:q.image,alt:'문제 그림'})));
@@ -278,7 +368,8 @@ function renderQuiz(){
   // choices state
   let kind; // 'pick' | 'judged' | 'show'
   let picks;
-  if(isMock){ if(review){kind='judged';picks=a?a.picks:[];} else {kind='pick';picks=a?a.picks:[];} }
+  if(auto){kind=s.phase==='answer'?'show':'autoQuestion';picks=[];}
+  else if(isMock){ if(review){kind='judged';picks=a?a.picks:[];} else {kind='pick';picks=a?a.picks:[];} }
   else if(a){kind='judged';picks=a.picks;}
   else if(S.mode==='answer'){kind='show';picks=[];}
   else {kind='pick';picks=pending;}
@@ -290,21 +381,14 @@ function renderQuiz(){
     if(kind==='pick'){ if(picks.includes(n))b.classList.add('picked'); }
     else{
       b.disabled=true;
-      if(q.answer.includes(n))b.classList.add('correct');
+      if(kind!=='autoQuestion'&&q.answer.includes(n))b.classList.add('correct');
       else if(kind==='judged'&&picks.includes(n))b.classList.add('wrong');
     }
     box.append(b);
   });
   card.append(box);
 
-  if(kind==='judged'){
-    const ok=sameSet(picks,q.answer);
-    card.append(h('div',{class:'result '+(ok?'ok':'ng')},
-      ok?'정답입니다!':(picks.length?'오답입니다. ':'풀지 않은 문제입니다. ')+'정답: '+q.answer.join(', ')+'번'));
-  } else if(kind==='show'){
-    card.append(h('div',{class:'result ok'},'정답: '+q.answer.join(', ')+'번'));
-  }
-  if(kind!=='pick'){
+  if(kind!=='pick'&&kind!=='autoQuestion'&&(!explanationToggle||explanationVisible)){
     card.append(h('div',{class:'exp'},h('b',{},'해설'),q.explanation||'(PDF에 해설이 없는 문제입니다)'));
   }
   root.append(card);
@@ -313,10 +397,12 @@ function renderQuiz(){
   const last=s.pos===total-1;
   let nextLabel='다음';
   if(last){ nextLabel=isMock?(review?'결과 보기':'채점하기'):'홈으로'; }
-  root.append(h('div',{class:'nav'},
-    h('button',{disabled:s.pos===0,onclick:prev},'이전'),
-    h('button',{class:'primary',onclick:next},nextLabel)));
-  root.append(h('div',{class:'hint'},'키보드: 숫자 1~5 보기 선택, Enter 또는 → 다음, ← 이전, S 별표'));
+  if(!auto){
+    root.append(h('div',{class:'nav'},
+      h('button',{disabled:s.pos===0,onclick:prev},'이전'),
+      h('button',{class:'primary',onclick:next},nextLabel)));
+    root.append(h('div',{class:'hint'},'키보드: 숫자 1~5 보기 선택, Enter 또는 → 다음, ← 이전, S 별표'));
+  }
   $app.replaceChildren(root);
 
   stopTimer();
@@ -328,6 +414,16 @@ function renderQuiz(){
       if(c){c.textContent=fmt(rem);c.classList.toggle('low',rem<5*60000);}
       if(rem<=0){stopTimer();finishMock(true);}
     },1000);
+  } else if(auto){
+    if(s.paused)return;
+    const phase=s.phase, pos=s.pos, delay=s.remainingMs==null?3000:s.remainingMs;
+    s.deadline=Date.now()+delay;
+    timer=setTimeout(()=>{
+      if(S.session!==s||s.pos!==pos||s.phase!==phase)return;
+      if(phase==='question'){s.phase='answer';s.remainingMs=3000;renderQuiz();}
+      else if(pos===s.ids.length-1){S.session=null;save();renderHome();toast('논스톱 암기하기를 마쳤어요');}
+      else movePos(pos+1);
+    },delay);
   }
 }
 const remainMs=s=>Math.max(0,MOCK_MIN*60000-(Date.now()-s.startedAt));
@@ -351,8 +447,8 @@ function pick(n){
   const ok=sameSet(pending,q.answer);
   s.ans[id]={picks:pending.slice(),ok};
   S.last[id]=ok;
-  if(ok){S.combo++;S.best=Math.max(S.best,S.combo);flash='up';if(s.type==='wrong')delete S.wrong[id];}
-  else{S.combo=0;flash='break';S.wrong[id]=(S.wrong[id]||0)+1;}
+  if(ok){S.combo++;S.best=Math.max(S.best,S.combo);flash='up';}
+  else{S.combo=0;flash='break';}
   pending=[];
   save();renderQuiz();if(ok&&s.type==='all')popConfetti();if(s.type==='all')cheer(s.pos+1);
 }
@@ -366,9 +462,21 @@ function toggleStar(){
 }
 
 function movePos(p){
-  const s=S.session;s.pos=p;pending=[];
+  const s=S.session;s.pos=p;if(s.type==='memorize'){s.phase='question';s.remainingMs=3000;s.paused=false;}pending=[];
   if(s.type==='all'&&s.seq)S.allPos=p;
   save();renderQuiz();window.scrollTo({top:0});
+}
+function toggleAutoPause(){
+  const s=S.session;if(!s||s.type!=='memorize')return;
+  if(s.paused){s.paused=false;save();renderQuiz();return;}
+  s.remainingMs=Math.max(0,(s.deadline||Date.now())-Date.now());
+  s.paused=true;stopTimer();save();renderQuiz();
+}
+function setExplanationVisibility(show){
+  const s=S.session;if(!s||!(s.type==='memorize'||s.type==='all'))return;
+  if((s.showExplanation!==false)===show)return;
+  if(s.type==='memorize'&&!s.paused&&s.deadline)s.remainingMs=Math.max(0,s.deadline-Date.now());
+  s.showExplanation=show;save();renderQuiz();
 }
 function prev(){const s=S.session;if(s.pos>0)movePos(s.pos-1);}
 function next(){
@@ -400,7 +508,7 @@ function finishMock(auto){
     const q=QUESTIONS[id-1];
     const a=s.ans[id]||(s.ans[id]={picks:[]});
     a.ok=sameSet(a.picks,q.answer);
-    if(a.ok){correct++;score+=(s.pts?s.pts[id]:2.5);}else S.wrong[id]=(S.wrong[id]||0)+1;
+    if(a.ok){correct++;score+=(s.pts?s.pts[id]:2.5);}
     S.last[id]=a.ok;
   });
   s.finished=true;
@@ -412,7 +520,7 @@ function renderResult(){
   view='result';stopTimer();
   const s=S.session;if(!s||!s.result){renderHome();return;}
   const r=s.result, root=h('div');
-  root.append(h('div',{class:'top'},h('div',{class:'l'},h('button',{class:'btn sm',onclick:renderHome},'홈'),h('span',{class:'tag0'},'모의고사 결과'))));
+  root.append(h('div',{class:'top'},h('div',{class:'l'},h('button',{class:'btn sm icon-home',type:'button',title:'홈','aria-label':'홈',onclick:renderHome},homeIcon()),h('span',{class:'tag0'},'모의고사 · 결과'))));
   const card=h('div',{class:'qcard'});
   card.append(h('div',{class:'score'},h('div',{class:'sub'},'점수'),h('div',{class:'big'},r.score+'점'),
     h('div',{class:'sub'},r.total+'문제 중 '+r.correct+'문제 정답 · 소요 시간 '+fmt(r.time)+(r.auto&&r.time>=MOCK_MIN*60000?' (시간 종료로 자동 제출)':''))));
@@ -427,7 +535,7 @@ function renderResult(){
     h('button',{class:'btn primary',disabled:firstWrong<0,onclick:()=>{s.pos=firstWrong;save();renderQuiz();}},'틀린 문제부터 복습'),
     h('button',{class:'btn',onclick:startMock},'모의고사 다시 보기'),
     h('button',{class:'btn',onclick:renderHome},'홈으로')));
-  card.append(h('div',{class:'mocks'},'틀린 문제는 오답노트에 자동으로 담겼어요.'));
+  card.append(h('div',{class:'mocks'},'틀린 문제는 결과 화면에서 다시 확인할 수 있어요.'));
   root.append(card);
   $app.replaceChildren(root);
   window.scrollTo({top:0});
@@ -440,7 +548,7 @@ document.addEventListener('keydown',e=>{
   if(document.activeElement&&document.activeElement.tagName==='BUTTON')document.activeElement.blur();
   if(e.key==='ArrowRight'||e.key==='Enter'){e.preventDefault();next();}
   else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
-  else if(e.key==='s'||e.key==='S'){toggleStar();}
+  else if((e.key==='s'||e.key==='S')&&S.session.type!=='memorize'){toggleStar();}
   else if(/^[1-5]$/.test(e.key)){const {q}=curQ();if(+e.key<=q.choices.length)pick(+e.key);}
 });
 
